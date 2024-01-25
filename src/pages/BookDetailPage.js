@@ -24,13 +24,13 @@ const BookDetailPage = () => {
   useEffect(() => {
     const postData = async () => {
       if (!addingBook) return;
-      dispatch(postFavorBook(addingBook));
+      dispatch(postFavorBook({ addingBook }));
     };
     postData();
   }, [addingBook, dispatch]);
 
   useEffect(() => {
-    dispatch(getDetailBook(bookId));
+    dispatch(getDetailBook({ bookId }));
   }, [bookId, dispatch]);
 
   return (

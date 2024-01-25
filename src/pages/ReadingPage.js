@@ -22,7 +22,7 @@ const ReadingPage = () => {
   // const [loading, setLoading] = useState(false);
   const [removedBookId, setRemovedBookId] = useState("");
 
-  const { books, loading } = useSelector((state) => state.bookStore);
+  const { favoriteBooks, loading } = useSelector((state) => state.bookStore);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -49,7 +49,7 @@ const ReadingPage = () => {
       return;
     }
     console.log("4");
-    dispatch(removeFavorBook(removedBookId));
+    dispatch(removeFavorBook({ removedBookId }));
   }, [removedBookId, dispatch]);
 
   return (
@@ -68,7 +68,7 @@ const ReadingPage = () => {
           justifyContent="space-around"
           flexWrap={"wrap"}
         >
-          {books.map((book) => (
+          {favoriteBooks.map((book) => (
             <Card
               key={book.id}
               sx={{

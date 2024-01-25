@@ -4,30 +4,26 @@ import { toast } from "react-toastify";
 
 const initialState = {
   books: [],
-  pageNum: 1,
-  totalPage: 10,
-  limit: 10,
+  favoriteBooks: [],
   loading: false,
-  query: "",
   errorMessage: "",
   book: null,
 };
 
 export const getBooks = createAsyncThunk(
   "bookStore/getBooks",
-  async ({ getState }) => {
-    const state = getState();
-    let url = `/books?_page=${state.pageNum}&_limit=${state.limit}`;
-    if (state.query) url += `&q=${state.query}`;
+  async ({ pageNum, limit, query }) => {
+    // console.log(`${pageNum}-${query}`);
+    let url = `/books?_page=${pageNum}&_limit=${limit}`;
+    if (query) url += `&q=${query}`;
     const response = await api.get(url);
-    // console.log(response.data);
     return response.data;
   }
 );
 
 export const getDetailBook = createAsyncThunk(
   "bookStore/getDetailBook",
-  async (bookId) => {
+  async ({ bookId }) => {
     const response = await api.get(`/books/${bookId}`);
     return response.data;
   }
@@ -35,7 +31,7 @@ export const getDetailBook = createAsyncThunk(
 
 export const postFavorBook = createAsyncThunk(
   "bookStore/postFavorBook",
-  async (addingBook) => {
+  async ({ addingBook }) => {
     const response = await api.post(`/favorites`, addingBook);
     return response.data;
   }
@@ -51,9 +47,10 @@ export const getFavoriteBooks = createAsyncThunk(
 
 export const removeFavorBook = createAsyncThunk(
   "bookStore/removeFavorBook",
-  async (removedBookId) => {
-    const response = await api.delete(`/favorites/${removedBookId}`);
-    return response.data;
+  async ({ removedBookId }) => {
+    await api.delete(`/favorites/${removedBookId}`);
+    // console.log(removedBookId);
+    return removedBookId;
   }
 );
 
@@ -61,12 +58,9 @@ export const bookStoreSlice = createSlice({
   name: "book-store",
   initialState,
   reducers: {
-    setQuery: (state, action) => {
-      state.query = action.payload;
-    },
-    setPageNum: (state, action) => {
-      state.pageNum = action.payload;
-    },
+    // setQuery: (state, action) => {
+    //   state.query = action.payload;
+    // },
   },
   extraReducers: (builder) => {
     builder
@@ -100,8 +94,9 @@ export const bookStoreSlice = createSlice({
       .addCase(postFavorBook.pending, (state) => {
         state.loading = true;
       })
-      .addCase(postFavorBook.fulfilled, (state) => {
+      .addCase(postFavorBook.fulfilled, (state, action) => {
         state.loading = false;
+        state.favoriteBooks.push(action.payload);
         toast.success("The book has been added to the reading list!");
       })
       .addCase(postFavorBook.rejected, (state, action) => {
@@ -115,7 +110,7 @@ export const bookStoreSlice = createSlice({
       })
       .addCase(getFavoriteBooks.fulfilled, (state, action) => {
         state.loading = false;
-        state.books = action.payload;
+        state.favoriteBooks = action.payload;
       })
       .addCase(getFavoriteBooks.rejected, (state, action) => {
         state.loading = false;
@@ -126,8 +121,11 @@ export const bookStoreSlice = createSlice({
       .addCase(removeFavorBook.pending, (state) => {
         state.loading = true;
       })
-      .addCase(removeFavorBook.fulfilled, (state) => {
+      .addCase(removeFavorBook.fulfilled, (state, action) => {
         state.loading = false;
+        state.favoriteBooks = state.favoriteBooks.filter(
+          (item) => item.id !== action.payload
+        );
         toast.success("The book has been removed");
       })
       .addCase(removeFavorBook.rejected, (state, action) => {
@@ -137,5 +135,5 @@ export const bookStoreSlice = createSlice({
   },
 });
 
-export const { setQuery, setPageNum } = bookStoreSlice.actions;
+export const { setQuery } = bookStoreSlice.actions;
 export default bookStoreSlice.reducer;

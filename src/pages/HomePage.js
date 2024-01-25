@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import PaginationBar from "../components/PaginationBar";
@@ -18,22 +18,23 @@ import {
   CardContent,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { getBooks, setQuery } from "../bookStoreSlice";
+import { getBooks } from "../bookStoreSlice";
 
 const BACKEND_API = process.env.REACT_APP_BACKEND_API;
 
 const HomePage = () => {
   // const [books, setBooks] = useState([]);
-  // const [pageNum, setPageNum] = useState(1);
-  // const totalPage = 10;
-  // const limit = 10;
+  const [pageNum, setPageNum] = useState(1);
+  const totalPage = 10;
+  const limit = 10;
 
   // const [loading, setLoading] = useState(false);
-  // const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
   // const [errorMessage, setErrorMessage] = useState("");
 
-  const { books, pageNum, totalPage, limit, loading, query, errorMessage } =
-    useSelector((state) => state.bookStore);
+  const { books, loading, errorMessage } = useSelector(
+    (state) => state.bookStore
+  );
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    dispatch(getBooks());
+    dispatch(getBooks({ pageNum, limit, query }));
   }, [pageNum, limit, query, dispatch]);
   //--------------form
   const defaultValues = {
@@ -53,7 +54,8 @@ const HomePage = () => {
   });
   const { handleSubmit } = methods;
   const onSubmit = (data) => {
-    dispatch(setQuery(data.searchQuery));
+    console.log(data);
+    setQuery(data.searchQuery);
   };
   return (
     <Container>
@@ -73,7 +75,11 @@ const HomePage = () => {
             <SearchForm />
           </Stack>
         </FormProvider>
-        <PaginationBar pageNum={pageNum} totalPageNum={totalPage} />
+        <PaginationBar
+          pageNum={pageNum}
+          setPageNum={setPageNum}
+          totalPageNum={totalPage}
+        />
       </Stack>
       <div>
         {loading ? (

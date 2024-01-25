@@ -4,10 +4,9 @@ import Stack from "@mui/material/Stack";
 import { useDispatch } from "react-redux";
 import { setPageNum } from "../bookStoreSlice";
 
-const PaginationBar = ({ pageNum, totalPageNum }) => {
-  const dispatch = useDispatch();
+const PaginationBar = ({ pageNum, setPageNum, totalPageNum }) => {
   const handleChange = (event, value) => {
-    dispatch(setPageNum(value));
+    setPageNum(value);
   };
   return (
     <Stack spacing={2}>
